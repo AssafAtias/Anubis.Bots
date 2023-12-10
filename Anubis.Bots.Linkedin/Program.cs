@@ -1,4 +1,7 @@
-﻿using OpenQA.Selenium;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
 namespace Anubis.Bots.Linkedin
@@ -33,29 +36,51 @@ namespace Anubis.Bots.Linkedin
             
             login_Button.Click();
 
-            var tmpSearchPage = searchPage.Replace("#{searchCriteria}", searchCriteria);
+            // var tmpSearchPage = searchPage.Replace("#{searchCriteria}", searchCriteria);
+            // driver.Navigate().GoToUrl(tmpSearchPage);
+            //IWebElement messageButton = driver.FindElement(By.CssSelector("[aria-label='Message ']"));
+
+            // open user profile by id
+            var userId = "assaf-atias-84099832";
             
-            driver.Navigate().GoToUrl(tmpSearchPage);
+            var userUrl = $"https://www.linkedin.com/in/{userId}/";
+            driver.Navigate().GoToUrl(userUrl);
             
-            IWebElement messageButton = driver.FindElement(By.CssSelector("[aria-label='Message ']"));
+            Thread.Sleep(1000);
             
-            messageButton.Click();
+            var cssSelector = "[aria-label*='Message ']";
             
+            IWebElement messageButton = driver.FindElement(By.CssSelector(cssSelector));
+
+            // ((IJavaScriptExecutor)driver).ExecuteScript("$('" + cssSelector + "').click();");
+
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", messageButton);
+            
+            Thread.Sleep(500);
+            
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", messageButton);
+            
+            // send message
             IWebElement messageTextArea = driver.FindElement(By.CssSelector("[aria-label='Write a message…']"));
             
             messageTextArea.SendKeys("Hi, I would like to connect with you!!! - anubis bot mother fucker hahahaha");
-
+            
             IWebElement buttonSendMessage =
                 driver.FindElement(By.CssSelector(".msg-form__send-button.artdeco-button.artdeco-button--1"));
             
             buttonSendMessage.Click();
             
-            // // Find the element using the aria-label attribute
-            // IWebElement element = driver.FindElement(By.CssSelector("[aria-label='Invite "+searchCriteria+" to connect']"));
-            //
-            // // Perform actions on the element, like clicking it
-            // element.Click();
+            // wait until the click ^ action will be done!
+            Thread.Sleep(1000);
+            
+            // close the message box
+            IWebElement buttonCloseConversation = driver.FindElements(By.CssSelector(".artdeco-button__text"))
+                ?.FirstOrDefault(x =>
+                    x.Text.StartsWith("Close your conversation", StringComparison.InvariantCultureIgnoreCase));
+            
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", buttonCloseConversation);
 
+            
             // Close the browser after task completion
             driver.Quit();
             
