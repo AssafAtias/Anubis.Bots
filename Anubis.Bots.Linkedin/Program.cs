@@ -8,8 +8,8 @@ namespace Anubis.Bots.Linkedin
 {
     internal class Program
     {
-        static string userName = "netanelabergel@gmail.com";
-        static string password = "Na27986772";
+        private static string userName = "neta931test@gmail.com";
+        private static string password = "bcfhF.xe28!jdY8";
         static string searchCriteria = "Assaf Atias";
         static string startUrl = "https://www.linkedin.com/uas/login?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Fsearch%2Fresults%2Fall%2F%3Fkeywords%3D"+searchCriteria+"&fromSignIn=true&trk=cold_join_sign_in";
         
@@ -48,11 +48,55 @@ namespace Anubis.Bots.Linkedin
             
             Thread.Sleep(1000);
             
-            var cssSelector = "[aria-label*='Message ']";
+            // check if the user is already connected
+            var pendingBtnExists = driver.FindElement(By.CssSelector("[aria-label*='Pending, ']"));
+            if (pendingBtnExists != null) // user is waiting for connection approval 
+            {
+                return;
+            }
             
-            IWebElement messageButton = driver.FindElement(By.CssSelector(cssSelector));
+            // connect
+            IWebElement buttonConnect =
+                driver.FindElement(By.CssSelector("[aria-label*='Invite']"));
+            
+            Thread.Sleep(500);
+            
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", buttonConnect);
+            
+            //Invitation not sent to the user. You can resend an invitation 3 weeks after withdrawing it.
+            IWebElement withdrawingStatus =
+                driver.FindElement(By.CssSelector(".artdeco-toast-item__message"));
 
-            // ((IJavaScriptExecutor)driver).ExecuteScript("$('" + cssSelector + "').click();");
+            if (withdrawingStatus != null)
+            {
+                return;
+            }
+      
+            // add a note
+            IWebElement buttonAddANote =
+                driver.FindElement(By.CssSelector("[aria-label='Add a note']"));
+            
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", buttonAddANote);
+            
+            Thread.Sleep(500);
+            
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", buttonAddANote);
+                
+            // write and send a note with the connection request 
+            IWebElement textAreaNote =
+                driver.FindElement(By.CssSelector("[name='message']"));
+            
+            textAreaNote.SendKeys("Let's connect! Netanel");
+            
+            IWebElement buttonSendNote =
+                driver.FindElements(By.CssSelector(".artdeco-button"))?.FirstOrDefault(x =>
+                    x.Text.StartsWith("Send", StringComparison.InvariantCultureIgnoreCase));
+            
+            buttonSendNote.Click();
+            
+            // send message to the user
+            var cssSelector = "[aria-label*='Message ']";
+            IWebElement messageButton = driver.FindElement(By.CssSelector(cssSelector));
 
             ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", messageButton);
             
@@ -85,7 +129,6 @@ namespace Anubis.Bots.Linkedin
             
             // Close the browser after task completion
             driver.Quit();
-            
         }
     }
 }
