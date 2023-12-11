@@ -60,10 +60,12 @@ namespace Anubis.Bots.Linkedin
             
             ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", messageButton);
             
+            Thread.Sleep(1000);
+            
             // send message
             IWebElement messageTextArea = driver.FindElement(By.CssSelector("[aria-label='Write a message…']"));
             
-            messageTextArea.SendKeys("Hi, I would like to connect with you!!! - anubis bot mother fucker hahahaha");
+            messageTextArea.SendKeys("Hi, my name is Netanel. Let's connect!");
             
             IWebElement buttonSendMessage =
                 driver.FindElement(By.CssSelector(".msg-form__send-button.artdeco-button.artdeco-button--1"));
@@ -79,7 +81,6 @@ namespace Anubis.Bots.Linkedin
                     x.Text.StartsWith("Close your conversation", StringComparison.InvariantCultureIgnoreCase));
             
             ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", buttonCloseConversation);
-
             
             // Close the browser after task completion
             driver.Quit();
