@@ -68,7 +68,8 @@ namespace Anubis.Bots.Linkedin
             messageTextArea.SendKeys("Hi, my name is Netanel. Let's connect!");
             
             IWebElement buttonSendMessage =
-                driver.FindElement(By.CssSelector(".msg-form__send-button.artdeco-button.artdeco-button--1"));
+                driver.FindElements(By.CssSelector(".artdeco-button"))?.FirstOrDefault(x =>
+                    x.Text.StartsWith("Send", StringComparison.InvariantCultureIgnoreCase));
             
             buttonSendMessage.Click();
             
