@@ -21,15 +21,32 @@ namespace Anubis.Bots.Linkedin
             
             driver.Manage().Window.Maximize();
 
-            // string userName = "neta931test931@gmail.com"; //"neta931test@gmail.com";
-            // string password = "bcfhF.xe28!jdY8";
-            // string loginPageUrl = "https://www.linkedin.com/uas/login?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Fsearch%2Fresults%2Fall%2F%3Fkeywords%3D"+searchCriteria+"&fromSignIn=true&trk=cold_join_sign_in";
+            var feedUrl = "https://www.linkedin.com/feed/";
             
-            //Login(driver, loginPageUrl, userName, password);
+            // check if user is logged in
+            driver.Navigate().GoToUrl(feedUrl);
+            Thread.Sleep(2000);
+            var cookies = driver.Manage().Cookies;
+            var cookie = cookies.GetCookieNamed("li_at");
+            if (cookie == null || driver.Url != feedUrl)
+            {
+                SetCookiesFromFile(driver);
+                
+                // check if user is logged in
+                driver.Navigate().GoToUrl("https://www.linkedin.com/feed/");
+                
+                cookie = cookies.GetCookieNamed("li_at");
+                
+                if (cookie == null|| driver.Url != feedUrl)
+                {
+                    // login
+                    string userName = "neta931test931@gmail.com"; //"neta931test@gmail.com";
+                    string password = "bcfhF.xe28!jdY8";
+                    string loginPageUrl = "https://www.linkedin.com/uas/login?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Fsearch%2Fresults%2Fall%2F%3Fkeywords%3D"+searchCriteria+"&fromSignIn=true&trk=cold_join_sign_in";
+                    Login(driver, loginPageUrl, userName, password);
+                }
+            }
             
-            driver.Navigate().GoToUrl(searchPage.Replace("#{searchCriteria}", searchCriteria));
-            
-            SetCookiesFromFile(driver);
 
             driver.Navigate().GoToUrl(searchPage.Replace("#{searchCriteria}", searchCriteria));
             
