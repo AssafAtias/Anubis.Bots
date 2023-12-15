@@ -35,7 +35,7 @@ namespace Anubis.Bots.Linkedin
             
             DummyMouseMovement(driver);
             
-            var unseenMessagesCount = GetUnseenMessages(driver);
+            var unseenMessagesCount = GetUnseenMessagesCount(driver);
 
             if (unseenMessagesCount > 0)
             {
@@ -82,20 +82,6 @@ namespace Anubis.Bots.Linkedin
             Login(driver, cookies);
         }
         
-        private static void EnsureLoggedIn(IWebDriver driver, string userName, string password, bool forceLogin = false)
-        {
-            if (IsUserLoggedIn(driver) && !forceLogin) return;
-
-            
-            
-            // login
-          
-            // "https://www.linkedin.com/uas/login?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Fsearch%2Fresults%2Fall%2F%3Fkeywords%3D" +
-                // searchCriteria + "&fromSignIn=true&trk=cold_join_sign_in";
-            
-            Login(driver, userName, password);
-        }
-
         private static bool IsUserLoggedIn(IWebDriver driver)
         {
             var feedUrl = "https://www.linkedin.com/feed/";
@@ -103,8 +89,8 @@ namespace Anubis.Bots.Linkedin
 
             if (driver.Url == feedUrl)
             {
-                WaitUntilLoaded(driver, ".share-box-feed-entry__top-bar");
-                return true;
+                var element = WaitUntilLoaded(driver, ".share-box-feed-entry__top-bar");
+                return element != null;
             }
 
             return false;
@@ -212,7 +198,7 @@ namespace Anubis.Bots.Linkedin
             Thread.Sleep(1000);
         }
 
-        private static int GetUnseenMessages(IWebDriver driver)
+        private static int GetUnseenMessagesCount(ISearchContext driver)
         {
             var unseenMessagesCount = 0;
             
@@ -389,6 +375,8 @@ namespace Anubis.Bots.Linkedin
 
         private static void Login(IWebDriver driver, string userName, string password)
         {
+            if (IsUserLoggedIn(driver)) return;
+            
             var loginPageUrl =
                 "https://www.linkedin.com/signup/cold-join?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Ffeed%2F&trk=login_reg_redirect";
 
