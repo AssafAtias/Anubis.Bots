@@ -521,7 +521,7 @@ namespace Anubis.Bots.Linkedin
             // searchButton.Click();
         }
 
-        public void LikePost(Uri postUri, PostReaction reaction = PostReaction.Like)
+        public void LikeOnPost(Uri postUri, PostReaction reaction = PostReaction.Like)
         {
             _linkedinNavigator.Navigate(postUri);
 

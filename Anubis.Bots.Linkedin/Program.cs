@@ -31,7 +31,7 @@ namespace Anubis.Bots.Linkedin
 
             var postUri = new Uri("https://www.linkedin.com/feed/update/urn:li:share:7141863247749533696");
             
-            linkedinDriver.LikePost(postUri, PostReaction.Like);
+            linkedinDriver.LikeOnPost(postUri, PostReaction.Like);
              
             //
             // var commentUri = linkedinDriver.AddCommentToPost(postUri, commentText: "commentttt" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
