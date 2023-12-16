@@ -3,7 +3,10 @@
     public enum PostReaction
     {
         Like,
-        Love,
-        Support,
+        // Celebrate,
+        // Support,
+        // Love,
+        // Insightful,
+        // Funny,
     }
 }

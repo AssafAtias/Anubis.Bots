@@ -29,21 +29,27 @@ namespace Anubis.Bots.Linkedin
             //
             // linkedinDriver.Navigate(LinkedinNavigatorOptions.Feed);
 
-            // var postUri = new Uri("https://www.linkedin.com/feed/update/urn:li:share:7141863247749533696");
+            var postUri = new Uri("https://www.linkedin.com/feed/update/urn:li:share:7141863247749533696");
+            
+            linkedinDriver.LikePost(postUri, PostReaction.Like);
+             
             //
             // var commentUri = linkedinDriver.AddCommentToPost(postUri, commentText: "commentttt" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             //
 
-            var unseenMessagesCount = linkedinDriver.GetUnseenMessagesCount();
-            var unreadNotificationsCount = linkedinDriver.GetUnreadNotificationsCount();
-
-            var userId = "assaf-atias-84099832";
-            // userId = "netanel-abergel";
+            // var unseenMessagesCount = linkedinDriver.GetUnseenMessagesCount();
+            // var unreadNotificationsCount = linkedinDriver.GetUnreadNotificationsCount();
+            //
+            // var userId = "assaf-atias-84099832";
+            // // userId = "netanel-abergel";
+            //
+            // if(!linkedinDriver.IsConnectedUser(userId) && !linkedinDriver.IsUserConnectionRequestPending(userId))
+            //     linkedinDriver.SendConnectionRequest(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+            // else if(!linkedinDriver.IsUserConnectionRequestPending(userId))
+            //     linkedinDriver.SendMessageToUser(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+            //
             
-            if(!linkedinDriver.IsConnectedUser(userId) && !linkedinDriver.IsUserConnectionRequestPending(userId))
-                linkedinDriver.SendConnectionRequest(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            else if(!linkedinDriver.IsUserConnectionRequestPending(userId))
-                linkedinDriver.SendMessageToUser(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+            
             
             // Close the browser after task completion
             driver.Quit();

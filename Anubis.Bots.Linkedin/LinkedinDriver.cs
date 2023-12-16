@@ -521,9 +521,19 @@ namespace Anubis.Bots.Linkedin
             // searchButton.Click();
         }
 
-        public void LikePost(string postId, PostReaction reaction = PostReaction.Like)
+        public void LikePost(Uri postUri, PostReaction reaction = PostReaction.Like)
         {
-            throw new NotImplementedException();
+            _linkedinNavigator.Navigate(postUri);
+
+            try
+            {
+                var reactionMenu = FindElement(By.CssSelector(".reactions-react-button"), retrySeconds: 2);
+                reactionMenu.Click();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
     }
 }
