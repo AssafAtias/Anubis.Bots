@@ -5,7 +5,6 @@ using System.Threading;
 using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 using Cookie = System.Net.Cookie;
 
 namespace Anubis.Bots.Linkedin
@@ -33,7 +32,7 @@ namespace Anubis.Bots.Linkedin
             
             ExportPageCookiesToFile(driver, "cookies.txt");
             
-            DummyMouseMovement(driver);
+            //DummyMouseMovement(driver);
             
             var unseenMessagesCount = GetUnseenMessagesCount(driver);
 
@@ -57,22 +56,66 @@ namespace Anubis.Bots.Linkedin
 
             ExportPageCookiesToFile(driver, "cookies.txt");
             
-            VisitPage(driver, "https://www.linkedin.com/feed/");
+            var homeNavButton = WaitUntilLoaded(driver, ".global-nav__primary-link", "https://www.linkedin.com/feed/");
+            homeNavButton.Click();
             
-            var startPostButton = WaitUntilLoaded(driver, ".share-box-feed-entry__trigger");
-            
-            startPostButton.Click();
-            
-            var postTextArea = WaitUntilLoaded(driver, "[aria-label='Text editor for creating content']");
-            
-            postTextArea.SendKeys("testtttt");
-            
-            var postButton = WaitUntilLoaded(driver, ".share-actions__primary-action");
-            
-            postButton.Click();
-            
+            // VisitPage(driver, "https://www.linkedin.com/feed/");
+
+            var notificationCount = GetUnreadNotificationsCount(driver);
+
+            var postUri =  PublishPost(driver, text: "post post post" + Guid.NewGuid().ToString());
+
             // Close the browser after task completion
             driver.Quit();
+        }
+
+        private static string PublishPost(IWebDriver driver, string text)
+        {
+            var startPostButton = WaitUntilLoaded(driver, ".share-box-feed-entry__trigger");
+
+            startPostButton.Click();
+
+            var postTextArea = WaitUntilLoaded(driver, "[aria-label='Text editor for creating content']");
+
+            postTextArea.SendKeys(text);
+
+            var postButton = WaitUntilLoaded(driver, ".share-actions__primary-action");
+
+            postButton.Click();
+            
+            var toastMsg = WaitUntilLoaded(driver, ".artdeco-toast-item__cta");
+            
+            return  toastMsg.GetAttribute("href"); // postUri
+        }
+        
+        private static int GetPostReactionsCount(IWebDriver driver, string postUri)
+        {
+            var reactionCountElement = WaitUntilLoaded(driver, ".social-details-social-counts__reactions-count");
+            
+            int.TryParse(reactionCountElement?.Text, out var reactionCount);
+            
+            return reactionCount;
+        }
+
+        private static int AddCommentToPost(IWebDriver driver, string postUri)
+        {
+            VisitPage(driver, postUri);
+            
+            var cssSelector = "[aria-label='Text editor for creating content']";   
+            return 0;
+        }
+
+        private static int GetUnreadNotificationsCount(IWebDriver driver)
+        {
+            VisitPage(driver, "https://www.linkedin.com/feed/");
+            
+            var notificationBadge = WaitUntilLoaded(driver, ".notification-badge__count");
+
+            var unreadNotificationCountStr = notificationBadge.Text?.Trim();
+
+            int.TryParse(unreadNotificationCountStr, out var unreadNotificationCount);
+
+            return unreadNotificationCount;
         }
 
         private static void EnsureLoggedIn(IWebDriver driver, Cookie[] cookies)
@@ -276,7 +319,11 @@ namespace Anubis.Bots.Linkedin
             ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", buttonCloseConversation);
         }
 
-        private static IWebElement WaitUntilLoaded(ISearchContext driver, string cssSelector, uint waitSeconds = 10)
+        private static IWebElement WaitUntilLoaded(
+            ISearchContext driver, 
+            string cssSelector,
+            string hrefStartWith = null,
+            uint waitSeconds = 10)
         {
             DateTime start = DateTime.Now; 
             IWebElement element = null;
@@ -285,11 +332,25 @@ namespace Anubis.Bots.Linkedin
             {
                 try
                 {
-                    element = driver.FindElement(By.CssSelector(cssSelector));
-                    if (element != null)
+                    if (string.IsNullOrWhiteSpace(hrefStartWith))
                     {
-                        break;
+                        element = driver.FindElement(By.CssSelector(cssSelector));
+                        if (element != null)
+                        {
+                            break;
+                        }
                     }
+                    else
+                    {
+                        element = driver.FindElements(By.CssSelector(cssSelector))?.FirstOrDefault(x =>
+                            x.GetAttribute("href").StartsWith(hrefStartWith, StringComparison.InvariantCultureIgnoreCase));
+                        if (element != null)
+                        {
+                            break;
+                        }
+                    }
+                    
+                   
 
                     Thread.Sleep(500);
                 }
