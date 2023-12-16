@@ -258,11 +258,12 @@ namespace Anubis.Bots.Linkedin
         /// <summary>
         /// Get post reactions count 
         /// </summary>
-        /// <param name="driver"></param>
         /// <param name="postUri"></param>
         /// <returns></returns>
-        public int GetPostReactionsCount(IWebDriver driver, string postUri)
+        public int GetPostReactionsCount(Uri postUri)
         {
+            _linkedinNavigator.Navigate(postUri);
+            
             var reactionCountElement = FindElement(".social-details-social-counts__reactions-count", 10);
             
             int.TryParse(reactionCountElement?.Text, out var reactionCount);
@@ -535,5 +536,135 @@ namespace Anubis.Bots.Linkedin
                 // ignored
             }
         }
+        
+        /// <summary>
+        /// Request to join group by group uri 
+        /// </summary>
+        /// <param name="groupUri"></param>
+        /// <exception cref="NotImplementedException"></exception>
+       public void RequestToJoinGroup(Uri groupUri)
+       {
+           _linkedinNavigator.Navigate(groupUri);
+           
+           // var joinButton = FindElement(By.CssSelector(".artdeco-button--primary"), retrySeconds: 10);
+           //
+           // joinButton.Click();
+           
+           throw new NotImplementedException();
+       }
+        
+       /// <summary>
+       /// Connect with people by hashtag 
+       /// </summary>
+       /// <param name="hashtag"></param>
+       /// <param name="numOfPeopleToConnect"></param>
+       /// <exception cref="ArgumentNullException"></exception>
+       /// <exception cref="ArgumentOutOfRangeException"></exception>
+       /// <exception cref="NotImplementedException"></exception>
+       public void RequestToConnectPeopleByHashtag(string hashtag, uint numOfPeopleToConnect = 10, string inviteNote = "Hey, I would like to increase my network and connect with you. I hope you don't mind. Thanks!")
+       {
+           if (hashtag == null) throw new ArgumentNullException(nameof(hashtag));
+           if (numOfPeopleToConnect <= 0) throw new ArgumentOutOfRangeException(nameof(numOfPeopleToConnect));
+              
+           _linkedinNavigator.ViewPeopleByHashtag(hashtag);
+
+           Thread.Sleep(new Random().Next(500,2000));
+           
+           // connect
+           var connectButtons =
+               FindElements(By.CssSelector("[aria-label*='Invite']"));
+
+           var topConnectButtons = connectButtons.Take((int)numOfPeopleToConnect).ToArray();
+           
+           foreach (var buttonConnect in topConnectButtons)
+           {
+               ExecuteJavaScript("arguments[0].click();", buttonConnect);
+
+               // add a note
+               var buttonAddANote =
+                   FindElement(By.CssSelector("[aria-label='Add a note']"), retrySeconds: 10);
+            
+               ExecuteJavaScript("arguments[0].scrollIntoView(true);", buttonAddANote);
+            
+               Thread.Sleep(500);
+            
+               ExecuteJavaScript("arguments[0].click();", buttonAddANote);
+                
+               Thread.Sleep(1000);
+            
+               // write and send a note with the connection request 
+               var textAreaNote =
+                   FindElement(By.CssSelector("[name='message']"), retrySeconds:10);
+
+               textAreaNote.SendKeys(inviteNote);
+            
+               var buttonSendNote =
+                   FindElements(By.CssSelector(".artdeco-button"))?.FirstOrDefault(x =>
+                       x.Text.StartsWith("Send", StringComparison.InvariantCultureIgnoreCase));
+               
+               buttonSendNote.Click();
+               
+               Thread.Sleep(new Random().Next(500,2000));
+           }
+       }
+       
+       /// <summary>
+       /// Like on post by hashtag 
+       /// </summary>
+       /// <param name="hashtag"></param>
+       /// <param name="numOfPostsToLike"></param>
+       /// <exception cref="ArgumentNullException"></exception>
+       /// <exception cref="ArgumentOutOfRangeException"></exception>
+       /// <exception cref="NotImplementedException"></exception>
+       public void LikeOnPostByHashtag(string hashtag, uint numOfPostsToLike = 10)
+       {
+           if (hashtag == null) throw new ArgumentNullException(nameof(hashtag));
+           if (numOfPostsToLike <= 0) throw new ArgumentOutOfRangeException(nameof(numOfPostsToLike));
+           
+           _linkedinNavigator.ViewPostsByHashtag(hashtag);
+
+           if (numOfPostsToLike > 10)
+           {
+               for (var i = 0; i < (numOfPostsToLike / 10) + 1; i++)
+               {
+                   ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
+                   Thread.Sleep(new Random().Next(500,2000));
+               }
+           
+               Thread.Sleep(new Random().Next(500,2000));
+           
+               ExecuteJavaScript("window.scrollTo(0, 0);");
+           }
+
+           var likeButtons = FindElements("[aria-label*='React Like']");
+         
+           var topLikeButtons = likeButtons.Take((int)numOfPostsToLike).ToArray();
+           
+           foreach (var likeButton in topLikeButtons)
+           {
+               likeButton.Click();
+               
+               Thread.Sleep(new Random().Next(500,2000));
+           }
+       }
+       
+       /// <summary>
+       /// Like on post by user id 
+       /// </summary>
+       /// <param name="userId"></param>
+       /// <param name="numOfPostsToLike"></param>
+       /// <exception cref="ArgumentNullException"></exception>
+       /// <exception cref="ArgumentOutOfRangeException"></exception>
+       /// <exception cref="NotImplementedException"></exception>
+       public void LikeOnPostByUserId(string userId, uint numOfPostsToLike = 10)
+       {
+           if (userId == null) throw new ArgumentNullException(nameof(userId));
+           if (numOfPostsToLike <= 0) throw new ArgumentOutOfRangeException(nameof(numOfPostsToLike));
+           
+           _linkedinNavigator.NavigateToUserProfile(userId);
+           
+           throw new NotImplementedException();
+       }
+       
     }
 }

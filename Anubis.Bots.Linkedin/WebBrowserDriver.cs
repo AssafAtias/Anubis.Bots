@@ -20,7 +20,7 @@ namespace Anubis.Bots.Linkedin
 
         public string CurrentPageUrl => _driver.Url;
 
-        public IWebElement FindElement(By by, uint retrySeconds)
+        public IWebElement FindElement(By by, uint retrySeconds, bool throwExceptionIfNotFound = true)
         {
             var retryPolicy = Policy
                 .Handle<NoSuchElementException>()
@@ -44,10 +44,12 @@ namespace Anubis.Bots.Linkedin
                     ?? throw new ElementNotSelectableException("Element not found");
             });
 
-            return element ?? throw new ElementNotSelectableException("Element not found");    
+            return element ?? (throwExceptionIfNotFound
+                ? throw new ElementNotSelectableException("Element not found")
+                : element);
         }
         
-        public IWebElement FindElement(string cssSelector, uint retrySeconds)
+        public IWebElement FindElement(string cssSelector, uint retrySeconds, bool throwExceptionIfNotFound = true)
         {
             if (cssSelector == null) throw new ArgumentNullException(nameof(cssSelector));
             if (retrySeconds <= 0) throw new ArgumentOutOfRangeException(nameof(retrySeconds));
@@ -74,7 +76,9 @@ namespace Anubis.Bots.Linkedin
                     ?? throw new ElementNotSelectableException("Element not found");
             });
 
-            return element ?? throw new ElementNotSelectableException("Element not found");
+            return element ?? (throwExceptionIfNotFound
+                ? throw new ElementNotSelectableException("Element not found")
+                : element);
         }
      
         public IWebElement FindElement(

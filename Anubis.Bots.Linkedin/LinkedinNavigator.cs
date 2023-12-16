@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Web;
 using OpenQA.Selenium;
 
 namespace Anubis.Bots.Linkedin
@@ -30,6 +31,11 @@ namespace Anubis.Bots.Linkedin
             _linkedinDriver = linkedinDriver;
         }
         
+        /// <summary>
+        /// Navigate to the specified page 
+        /// </summary>
+        /// <param name="option"></param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public void Navigate(LinkedinNavigatorOptions option)
         {
             switch (option)
@@ -124,6 +130,33 @@ namespace Anubis.Bots.Linkedin
         {
             if(_driver.Url != pageUrl.ToString())
                 _driver.Navigate().GoToUrl(pageUrl);
+        }
+
+        /// <summary>
+        /// View people by hashtag 
+        /// </summary>
+        /// <param name="hashtag"></param>
+        /// <param name="waitOnLoadSeconds"></param>
+        public void ViewPeopleByHashtag(string hashtag)
+        {
+            var encodedHashTag = HttpUtility.UrlEncode(hashtag);
+            var uriTemplate =
+                "https://www.linkedin.com/search/results/people/?keywords=#{HASHTAG}&origin=SWITCH_SEARCH_VERTICAL";
+            
+            Navigate(uriTemplate.Replace("#{HASHTAG}", encodedHashTag));
+        }
+
+        /// <summary>
+        /// View posts by hashtag 
+        /// </summary>
+        /// <param name="hashtag"></param>
+        public void ViewPostsByHashtag(string hashtag)
+        {
+            var encodedHashTag = HttpUtility.UrlEncode(hashtag);
+            var uriTemplate =
+                "https://www.linkedin.com/search/results/content/?keywords=#{HASHTAG}&origin=SWITCH_SEARCH_VERTICAL";
+            
+            Navigate(uriTemplate.Replace("#{HASHTAG}", encodedHashTag));
         }
     }
 }
