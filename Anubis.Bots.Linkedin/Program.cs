@@ -36,10 +36,10 @@ namespace Anubis.Bots.Linkedin
 
             var userId = "assaf-atias-84099832";
             // userId = "netanel-abergel";
-
-            if(!linkedinDriver.IsConnectedUser(userId) && !linkedinDriver.IsUserInviteStatusIsPending(userId))
+            
+            if(!linkedinDriver.IsConnectedUser(userId) && !linkedinDriver.IsUserConnectionRequestPending(userId))
                 linkedinDriver.SendConnectionRequest(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            else if(!linkedinDriver.IsUserInviteStatusIsPending(userId))
+            else if(!linkedinDriver.IsUserConnectionRequestPending(userId))
                 linkedinDriver.SendMessageToUser(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             
             // Close the browser after task completion

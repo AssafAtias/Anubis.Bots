@@ -427,7 +427,7 @@ namespace Anubis.Bots.Linkedin
         {
             _linkedinNavigator.NavigateToUserProfile(userId);
 
-            if (IsUserInviteStatusIsPending(userId)) return true;
+            if (IsUserConnectionRequestPending(userId)) return true;
             
             // connect
             var buttonConnect =
@@ -483,7 +483,7 @@ namespace Anubis.Bots.Linkedin
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public bool IsUserInviteStatusIsPending(string userId)
+        public bool IsUserConnectionRequestPending(string userId)
         {
             _linkedinNavigator.NavigateToUserProfile(userId);
             
