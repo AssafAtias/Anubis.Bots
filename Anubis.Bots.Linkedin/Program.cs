@@ -34,6 +34,9 @@ namespace Anubis.Bots.Linkedin
             // var commentUri = linkedinDriver.AddCommentToPost(postUri, commentText: "commentttt" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             //
 
+            var unseenMessagesCount = linkedinDriver.GetUnseenMessagesCount();
+            var unreadNotificationsCount = linkedinDriver.GetUnreadNotificationsCount();
+
             var userId = "assaf-atias-84099832";
             // userId = "netanel-abergel";
             

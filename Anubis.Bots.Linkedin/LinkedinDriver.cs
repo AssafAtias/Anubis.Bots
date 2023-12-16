@@ -330,7 +330,7 @@ namespace Anubis.Bots.Linkedin
             return unreadNotificationCount;
         }
         
-        public int GetUnseenMessagesCount(ISearchContext driver)
+        public int GetUnseenMessagesCount()
         {
             var unseenMessagesCount = 0;
             
