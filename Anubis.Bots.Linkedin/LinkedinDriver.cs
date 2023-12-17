@@ -587,11 +587,11 @@ namespace Anubis.Bots.Linkedin
             
                ExecuteJavaScript("arguments[0].scrollIntoView(true);", buttonAddANote);
             
-               Thread.Sleep(500);
+               RandomizeThreadSleep(500,1000);
             
                ExecuteJavaScript("arguments[0].click();", buttonAddANote);
                 
-               Thread.Sleep(1000);
+               RandomizeThreadSleep(1000,2000);
             
                // write and send a note with the connection request 
                var textAreaNote =
@@ -605,7 +605,7 @@ namespace Anubis.Bots.Linkedin
                
                buttonSendNote.Click();
                
-               Thread.Sleep(new Random().Next(500,2000));
+               RandomizeThreadSleep(500,3500);
            }
        }
        
@@ -623,86 +623,141 @@ namespace Anubis.Bots.Linkedin
            if (numOfPostsToLike <= 0) throw new ArgumentOutOfRangeException(nameof(numOfPostsToLike));
            
            _linkedinNavigator.ViewPostsByHashtag(hashtag);
-           
-           var likeButtons = FindElements("[aria-label*='React Like']")
-               .Where(x=>x.GetAttribute("aria-label")
-                   .EndsWith("post", StringComparison.InvariantCultureIgnoreCase))
-               .ToArray();
-           
+
+           var likeButtons = GetPostsLikeButton();
+
            var js = (IJavaScriptExecutor)_driver;
 
-           if (numOfPostsToLike <= likeButtons.Count())
+           var maxLoop = 1000;
+           var likedPosts = 0;
+           
+           var lastHeight = (long)js.ExecuteScript("return document.body.scrollHeight");
+           
+           while (likedPosts < numOfPostsToLike 
+                  && maxLoop-- > 0)
            {
+               ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
+       
+               RandomizeThreadSleep();
+       
+               likeButtons = GetPostsLikeButton();
+
+               if (likeButtons.Length == 0)
+                   continue;
+           
                foreach (var likeButton in likeButtons)
                {
-                   LikeOnPost(likeButton);
-                   Thread.Sleep(new Random().Next(750,2500));
-               }
-           }
-           else
-           {
-               var maxLoop = 1000;
-               var likedPosts = 0;
-               
-               var lastHeight = (long)js.ExecuteScript("return document.body.scrollHeight");
-               
-               while (numOfPostsToLike > likeButtons.Count() 
-                      && likedPosts < numOfPostsToLike 
-                      && maxLoop-- > 0)
-               {
-                   ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
-           
-                   Thread.Sleep(new Random().Next(750, 2500));
-           
-                   likeButtons = FindElements("[aria-label*='React Like']")
-                       .Where(x=>x.GetAttribute("aria-label")
-                           .EndsWith("post", StringComparison.InvariantCultureIgnoreCase))
-                       .ToArray();
+                   var likeClicked = Click(likeButton);
 
-                   if (likeButtons.Length == 0)
+                   if (!likeClicked)
                        continue;
                
-                   foreach (var likeButton in likeButtons)
-                   {
-                       LikeOnPost(likeButton);
-                   
-                       likedPosts++;
-
-                       if (likedPosts >= numOfPostsToLike)
-                           break;
-                       
-                       Thread.Sleep(new Random().Next(750, 2500));
-                   }
-               
-                   var newHeight = (long)js.ExecuteScript("return document.body.scrollHeight");
-
-                   if (newHeight == lastHeight)
-                       break; // Break the loop if scroll height hasn't changed
-               
-                   lastHeight = newHeight;
+                   likedPosts++;
 
                    if (likedPosts >= numOfPostsToLike)
                        break;
                    
+                   RandomizeThreadSleep();
                }
-           }
            
-           // var topLikeButtons = likeButtons.Take((int)numOfPostsToLike).ToArray();
+               var newHeight = (long)js.ExecuteScript("return document.body.scrollHeight");
+
+               if (newHeight == lastHeight || likedPosts >= numOfPostsToLike)
+                   break; // Break the loop if scroll height hasn't changed or if we reached the max liked posts
+           
+               lastHeight = newHeight;
+           }
+       }
+       
+       /// <summary>
+       /// Follow people by hashtag 
+       /// </summary>
+       /// <param name="hashtag"></param>
+       /// <param name="numOfPeopleToFollow"></param>
+       public void FollowByHashtag(string hashtag, int numOfPeopleToFollow = 10)
+       {
+           _linkedinNavigator.ViewPostsByHashtag(hashtag);
+           
+           var followButtons = FindElements("[aria-label*='Follow']");
+           
+           var js = (IJavaScriptExecutor)_driver;
+
+           var maxLoop = 1000;
+           var followed = 0;
+           
+           var lastHeight = (long)js.ExecuteScript("return document.body.scrollHeight");
+           
+           while (followed < numOfPeopleToFollow 
+                  && maxLoop-- > 0)
+           {
+               ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
+       
+               RandomizeThreadSleep();
+       
+               followButtons = FindElements("[aria-label*='Follow']");
+
+               if (followButtons.Count == 0)
+                   continue;
+           
+               foreach (var likeButton in followButtons)
+               {
+                   var clicked = Click(likeButton);
+
+                   if (!clicked)
+                       continue;
+               
+                   followed++;
+
+                   if (followed >= numOfPeopleToFollow)
+                       break;
+                   
+                   RandomizeThreadSleep();
+               }
+           
+               var newHeight = (long)js.ExecuteScript("return document.body.scrollHeight");
+
+               if (newHeight == lastHeight || followed >= numOfPeopleToFollow)
+                   break; // Break the loop if scroll height hasn't changed or if we reached the max liked posts
+           
+               lastHeight = newHeight;
+           }
        }
 
-       private void LikeOnPost(IWebElement likeButton)
+       /// <summary>
+       /// Randomize thread sleep 
+       /// </summary>
+       /// <param name="min"></param>
+       /// <param name="max"></param>
+       private static void RandomizeThreadSleep(int min = 750, int max = 2500)   
+        => Thread.Sleep(new Random().Next(min, max));
+
+       /// <summary>
+       /// Get posts like button 
+       /// </summary>
+       /// <returns></returns>
+       private IWebElement[] GetPostsLikeButton()
+        => FindElements("[aria-label*='React Like']")
+               .Where(x => x.GetAttribute("aria-label")
+                   .EndsWith("post", StringComparison.InvariantCultureIgnoreCase))
+               .ToArray();
+
+       private bool Click(IWebElement button)
        {
            try
            {
-               Thread.Sleep(new Random().Next(500, 1000));
-               ExecuteJavaScript("arguments[0].focus();", likeButton);
+               ExecuteJavaScript("arguments[0].focus();", button);
+               RandomizeThreadSleep();
                
-               likeButton.Click(); 
+               button.Click();
+
+               return true;
            }
            catch (Exception)
            {
                // ignored
            }
+           
+           return false;
        }
 
        /// <summary>
