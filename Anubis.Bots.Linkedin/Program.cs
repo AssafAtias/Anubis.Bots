@@ -35,7 +35,7 @@ namespace Anubis.Bots.Linkedin
             
             // linkedinDriver.RequestToConnectPeopleByHashtag("#bringthemhome", 10);
             
-            linkedinDriver.LikeOnPostByHashtag("#csharp", 10);
+            linkedinDriver.LikeOnPostByHashtag("#ecommerce", 100);
             
             //
             // var commentUri = linkedinDriver.AddCommentToPost(postUri, commentText: "commentttt" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -622,32 +623,88 @@ namespace Anubis.Bots.Linkedin
            if (numOfPostsToLike <= 0) throw new ArgumentOutOfRangeException(nameof(numOfPostsToLike));
            
            _linkedinNavigator.ViewPostsByHashtag(hashtag);
+           
+           var likeButtons = FindElements("[aria-label*='React Like']")
+               .Where(x=>x.GetAttribute("aria-label")
+                   .EndsWith("post", StringComparison.InvariantCultureIgnoreCase))
+               .ToArray();
+           
+           var js = (IJavaScriptExecutor)_driver;
 
-           if (numOfPostsToLike > 10)
+           if (numOfPostsToLike <= likeButtons.Count())
            {
-               for (var i = 0; i < (numOfPostsToLike / 10) + 1; i++)
+               foreach (var likeButton in likeButtons)
+               {
+                   LikeOnPost(likeButton);
+                   Thread.Sleep(new Random().Next(750,2500));
+               }
+           }
+           else
+           {
+               var maxLoop = 1000;
+               var likedPosts = 0;
+               
+               var lastHeight = (long)js.ExecuteScript("return document.body.scrollHeight");
+               
+               while (numOfPostsToLike > likeButtons.Count() 
+                      && likedPosts < numOfPostsToLike 
+                      && maxLoop-- > 0)
                {
                    ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
-                   Thread.Sleep(new Random().Next(500,2000));
-               }
            
-               Thread.Sleep(new Random().Next(500,2000));
+                   Thread.Sleep(new Random().Next(750, 2500));
            
-               ExecuteJavaScript("window.scrollTo(0, 0);");
-           }
+                   likeButtons = FindElements("[aria-label*='React Like']")
+                       .Where(x=>x.GetAttribute("aria-label")
+                           .EndsWith("post", StringComparison.InvariantCultureIgnoreCase))
+                       .ToArray();
 
-           var likeButtons = FindElements("[aria-label*='React Like']");
-         
-           var topLikeButtons = likeButtons.Take((int)numOfPostsToLike).ToArray();
-           
-           foreach (var likeButton in topLikeButtons)
-           {
-               likeButton.Click();
+                   if (likeButtons.Length == 0)
+                       continue;
                
-               Thread.Sleep(new Random().Next(500,2000));
+                   foreach (var likeButton in likeButtons)
+                   {
+                       LikeOnPost(likeButton);
+                   
+                       likedPosts++;
+
+                       if (likedPosts >= numOfPostsToLike)
+                           break;
+                       
+                       Thread.Sleep(new Random().Next(750, 2500));
+                   }
+               
+                   var newHeight = (long)js.ExecuteScript("return document.body.scrollHeight");
+
+                   if (newHeight == lastHeight)
+                       break; // Break the loop if scroll height hasn't changed
+               
+                   lastHeight = newHeight;
+
+                   if (likedPosts >= numOfPostsToLike)
+                       break;
+                   
+               }
+           }
+           
+           // var topLikeButtons = likeButtons.Take((int)numOfPostsToLike).ToArray();
+       }
+
+       private void LikeOnPost(IWebElement likeButton)
+       {
+           try
+           {
+               Thread.Sleep(new Random().Next(500, 1000));
+               ExecuteJavaScript("arguments[0].focus();", likeButton);
+               
+               likeButton.Click(); 
+           }
+           catch (Exception)
+           {
+               // ignored
            }
        }
-       
+
        /// <summary>
        /// Like on post by user id 
        /// </summary>
