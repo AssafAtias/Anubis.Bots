@@ -39,7 +39,7 @@ namespace Anubis.Bots.Linkedin
             
             // linkedinDriver.RequestToConnectPeopleByHashtag("#csharp", 10);
             
-            linkedinDriver.SendConnectionRequest("mohamedashrefbna");
+            linkedinDriver.SendConnectionRequest("demibenari");
             
             // linkedinDriver.LikeOnPostByHashtag("#dotnet", 10);
 

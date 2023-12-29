@@ -435,17 +435,14 @@ namespace Anubis.Bots.Linkedin
             
             // clean notifications from the page
             CleanBadgeNotification();
+            
             var moreActionsButton = FindElement("[aria-label='More actions']", retrySeconds: 5, false);
 
             if (moreActionsButton != null)
             {
-                ExecuteJavaScript("arguments[0].scrollIntoView(true);", moreActionsButton);
-
-                Thread.Sleep(500);
-
                 ExecuteJavaScript("arguments[0].click();", moreActionsButton);
 
-                Thread.Sleep(1000);
+                RandomizeThreadSleep(1000, 1500);
             }
 
             // connect
