@@ -61,8 +61,6 @@ namespace Anubis.Bots.Linkedin
             //     linkedinDriver.SendMessageToUser(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             //
             
-            
-            
             // Close the browser after task completion
             driver.Quit();
         }

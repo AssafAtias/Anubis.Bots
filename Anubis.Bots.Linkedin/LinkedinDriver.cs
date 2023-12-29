@@ -435,37 +435,22 @@ namespace Anubis.Bots.Linkedin
             
             // clean notifications from the page
             CleanBadgeNotification();
-            
+            var moreActionsButton = FindElement("[aria-label='More actions']", retrySeconds: 5, false);
+
+            if (moreActionsButton != null)
+            {
+                ExecuteJavaScript("arguments[0].scrollIntoView(true);", moreActionsButton);
+
+                Thread.Sleep(500);
+
+                ExecuteJavaScript("arguments[0].click();", moreActionsButton);
+
+                Thread.Sleep(1000);
+            }
+
             // connect
             var buttonConnect =
-                FindElement(By.CssSelector("[aria-label*='Invite']"), retrySeconds: 5, false);
-
-            if (buttonConnect == null) 
-            {
-                var moreActionsButton = FindElement("[aria-label='More actions']", retrySeconds: 5, false);
-                
-                if (moreActionsButton != null)
-                {
-                    ExecuteJavaScript("arguments[0].scrollIntoView(true);", moreActionsButton);
-                    
-                    Thread.Sleep(500);
-                    
-                    ExecuteJavaScript("arguments[0].click();", moreActionsButton);
-                    
-                    Thread.Sleep(1000);
-                    
-                    var connectButton = FindElement("[aria-label*='Invite']", retrySeconds: 5, false);
-                    
-                    if (connectButton != null)
-                    {
-                        ExecuteJavaScript("arguments[0].scrollIntoView(true);", connectButton);
-                        
-                        Thread.Sleep(500);
-                        
-                        ExecuteJavaScript("arguments[0].click();", connectButton);
-                    }
-                }
-            }
+                FindElement(By.CssSelector("[aria-label*='Invite']"), retrySeconds: 5, throwExceptionIfNotFound: true);
 
             ExecuteJavaScript("arguments[0].click();", buttonConnect);
 
