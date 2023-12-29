@@ -425,11 +425,29 @@ namespace Anubis.Bots.Linkedin
         /// <param name="userId"></param>
         /// <param name="inviteNote"></param>
         /// <returns></returns>
-        public bool SendConnectionRequest(string userId, string inviteNote)
+        public bool SendConnectionRequest(
+            string userId, 
+            string inviteNote = "Hey, I would like to increase my network and connect with you. I hope you don't mind. Thanks!")
         {
             _linkedinNavigator.NavigateToUserProfile(userId);
 
             if (IsUserConnectionRequestPending(userId)) return true;
+            
+            
+            // clean notifications from the page
+
+            try
+            {
+                var notificationElem = FindElement("[aria-label*='Dismiss']", retrySeconds: 1, false);
+                if (notificationElem != null)
+                {
+                    ExecuteJavaScript("arguments[0].click();", notificationElem);
+                }
+            }
+            catch (Exception )
+            { 
+                // ignored
+            }
             
             // connect
             var buttonConnect =
@@ -441,7 +459,7 @@ namespace Anubis.Bots.Linkedin
             {
                 //Invitation not sent to the user. You can resend an invitation 3 weeks after withdrawing it.
                 var withdrawingStatus =
-                    FindElement(By.CssSelector(".artdeco-toast-item__message"), retrySeconds:10);
+                    FindElement(By.CssSelector(".artdeco-toast-item__message"), retrySeconds:5);
 
                 if (withdrawingStatus != null)
                 {
@@ -562,53 +580,115 @@ namespace Anubis.Bots.Linkedin
        /// <exception cref="ArgumentNullException"></exception>
        /// <exception cref="ArgumentOutOfRangeException"></exception>
        /// <exception cref="NotImplementedException"></exception>
-       public void RequestToConnectPeopleByHashtag(string hashtag, uint numOfPeopleToConnect = 10, string inviteNote = "Hey, I would like to increase my network and connect with you. I hope you don't mind. Thanks!")
+       public void RequestToConnectPeopleByHashtag(
+           string hashtag, 
+           uint numOfPeopleToConnect = 10, 
+           string inviteNote = "Hey, I would like to increase my network and connect with you. I hope you don't mind. Thanks!")
        {
            if (hashtag == null) throw new ArgumentNullException(nameof(hashtag));
            if (numOfPeopleToConnect <= 0) throw new ArgumentOutOfRangeException(nameof(numOfPeopleToConnect));
               
            _linkedinNavigator.ViewPeopleByHashtag(hashtag);
 
-           Thread.Sleep(new Random().Next(500,2000));
+           RandomizeThreadSleep();
            
-           // connect
-           var connectButtons =
-               FindElements(By.CssSelector("[aria-label*='Invite']"));
-
-           var topConnectButtons = connectButtons.Take((int)numOfPeopleToConnect).ToArray();
-           
-           foreach (var buttonConnect in topConnectButtons)
+           var maxLoop = 100;
+           var invited = 0;
+           do
            {
-               ExecuteJavaScript("arguments[0].click();", buttonConnect);
+               // connect
+               var connectButtons =
+                   FindElements(By.CssSelector("[aria-label*='Invite']"));
 
+               if (connectButtons == null || !connectButtons.Any())
+               {
+                   var elem = FindElement("[aria-label='Next']", retrySeconds: 10, false);
+               
+                   if (elem == null || elem.GetAttribute("disabled") != null) break;
+               
+                   // scroll to next page
+                   elem.Click();
+               
+                   RandomizeThreadSleep();
+                   continue;
+               }
+
+               IWebElement[] selectedConnectButtons; 
+
+               if (connectButtons.Count > numOfPeopleToConnect - invited)
+                   selectedConnectButtons = connectButtons.Take((int)numOfPeopleToConnect- invited).ToArray();
+               else if (connectButtons.Count > numOfPeopleToConnect)
+                   selectedConnectButtons = connectButtons.Take((int)numOfPeopleToConnect).ToArray();
+               else
+                   selectedConnectButtons = connectButtons.ToArray();
+               
+               invited += InviteToConnect(selectedConnectButtons, inviteNote);
+               
+               RandomizeThreadSleep();
+               
+           } while (invited < numOfPeopleToConnect
+                    && maxLoop-- > 0);
+       }
+
+       private int InviteToConnect(IWebElement[] selectedConnectButtons, string inviteNote)
+       {
+           var invited = 0;
+           
+           foreach (var buttonConnect in selectedConnectButtons)
+           {
+              var successInvite = InviteToConnect(inviteNote, buttonConnect);
+
+              if(successInvite)
+                invited++;
+              
+               RandomizeThreadSleep(500, 3500);
+           }
+           
+           return invited; 
+       }
+
+       private bool InviteToConnect(string inviteNote, IWebElement buttonConnect)
+       {
+           try
+           {
+               ExecuteJavaScript("arguments[0].scrollIntoView(true);", buttonConnect);
+               
+               RandomizeThreadSleep(500, 1000);
+               
+               ExecuteJavaScript("arguments[0].click();", buttonConnect);
+               
                // add a note
                var buttonAddANote =
                    FindElement(By.CssSelector("[aria-label='Add a note']"), retrySeconds: 10);
-            
+
                ExecuteJavaScript("arguments[0].scrollIntoView(true);", buttonAddANote);
-            
-               RandomizeThreadSleep(500,1000);
-            
+
+               RandomizeThreadSleep(500, 1000);
+
                ExecuteJavaScript("arguments[0].click();", buttonAddANote);
-                
-               RandomizeThreadSleep(1000,2000);
-            
+
+               RandomizeThreadSleep(1000, 2000);
+
                // write and send a note with the connection request 
                var textAreaNote =
-                   FindElement(By.CssSelector("[name='message']"), retrySeconds:10);
+                   FindElement(By.CssSelector("[name='message']"), retrySeconds: 10);
 
                textAreaNote.SendKeys(inviteNote);
-            
+
                var buttonSendNote =
                    FindElements(By.CssSelector(".artdeco-button"))?.FirstOrDefault(x =>
                        x.Text.StartsWith("Send", StringComparison.InvariantCultureIgnoreCase));
-               
+
                buttonSendNote.Click();
-               
-               RandomizeThreadSleep(500,3500);
            }
+           catch (Exception)
+           {
+               return false;
+           }
+
+           return true;
        }
-       
+
        /// <summary>
        /// Like on post by hashtag 
        /// </summary>

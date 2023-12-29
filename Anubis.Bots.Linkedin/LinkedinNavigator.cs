@@ -20,7 +20,7 @@ namespace Anubis.Bots.Linkedin
             => new Uri("https://www.linkedin.com/feed/");
 
         private static Uri LoginPageUrl 
-            =>  new Uri("https://www.linkedin.com/signup/cold-join?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Ffeed%2F&trk=login_reg_redirect");
+            =>  new Uri("https://www.linkedin.com/uas/login?session_redirect=https%3A%2F%2Fwww%2Elinkedin%2Ecom%2Ffeed%2F&fromSignIn=true&trk=cold_join_sign_in");
 
         private readonly IWebDriver _driver;
         private readonly LinkedinDriver _linkedinDriver;

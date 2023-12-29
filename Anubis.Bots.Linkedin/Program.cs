@@ -18,10 +18,14 @@ namespace Anubis.Bots.Linkedin
             
             driver.Manage().Window.Maximize();
 
-            // var userName = "neta931test931@gmail.com"; //"neta931test@gmail.com";
-            // var password = "bcfhF.xe28!jdY8";
+            var userName = "netanel931139@gmail.com"; //"neta931test@gmail.com"; // "neta931test931@gmail.com"; //"neta931test@gmail.com";
+            var password = "bcfhF.xe28!jdY8";
+            
+            //var linkedinDriver = new LinkedinDriver(driver,userName,password); 
             
             var linkedinDriver = new LinkedinDriver(driver, "cookies.txt"); 
+            
+            linkedinDriver.ExportPageCookiesToFile();
             
             // linkedinDriver.Navigate(LinkedinNavigatorOptions.ViewProfile);
            
@@ -33,9 +37,13 @@ namespace Anubis.Bots.Linkedin
             
             // linkedinDriver.LikeOnPost(postUri, PostReaction.Like);
             
-            // linkedinDriver.RequestToConnectPeopleByHashtag("#bringthemhome", 10);
+            // linkedinDriver.RequestToConnectPeopleByHashtag("#csharp", 10);
             
-            linkedinDriver.LikeOnPostByHashtag("#dotnet", 100);
+            linkedinDriver.SendConnectionRequest("netanel-abergel");
+            
+            // linkedinDriver.LikeOnPostByHashtag("#dotnet", 10);
+
+            
             
             //
             // var commentUri = linkedinDriver.AddCommentToPost(postUri, commentText: "commentttt" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));

@@ -58,6 +58,7 @@ namespace Anubis.Bots.Linkedin
                 .Handle<NoSuchElementException>()
                 .Or<ElementNotVisibleException>()
                 .Or<ElementNotSelectableException>()
+                .Or<Exception>()
                 .WaitAndRetry(
                     retryCount: (int)(retrySeconds / 0.5), // Number of retries
                     sleepDurationProvider: retryAttempt => TimeSpan.FromMilliseconds(500), // Wait 500ms between each try
@@ -71,9 +72,19 @@ namespace Anubis.Bots.Linkedin
     
             retryPolicy.Execute(() =>
             {
-                // Attempt to find the element
-                element = FindElement(By.CssSelector(cssSelector)) 
-                    ?? throw new ElementNotSelectableException("Element not found");
+                try
+                {
+                    // Attempt to find the element
+                    element = FindElement(By.CssSelector(cssSelector)) 
+                            ?? throw new ElementNotSelectableException("Element not found");
+                }
+                catch (Exception e)
+                {
+                    if (throwExceptionIfNotFound)
+                        throw;
+                    else
+                        throw e;
+                }
             });
 
             return element ?? (throwExceptionIfNotFound
@@ -132,9 +143,9 @@ namespace Anubis.Bots.Linkedin
         public IWebElement FindElement(By by)
             => _driver.FindElement(by);
         
-        public void ExportPageCookiesToFile(IWebDriver driver, string cookiesTargetFilePath = "cookies.txt")
+        public void ExportPageCookiesToFile(string cookiesTargetFilePath = "cookies.txt")
         {
-            var cookies = GetPageCookies(driver);
+            var cookies = GetPageCookies();
             using (var f = File.Create(cookiesTargetFilePath))
             {
                 var cookiesStr = JsonConvert.SerializeObject(cookies);
@@ -148,9 +159,9 @@ namespace Anubis.Bots.Linkedin
         /// </summary>
         /// <param name="driver"></param>
         /// <returns></returns>
-        public Cookie[] GetPageCookies(IWebDriver driver)
+        public Cookie[] GetPageCookies()
         {
-            var cookies = driver.Manage().Cookies.AllCookies.ToArray();
+            var cookies = _driver.Manage().Cookies.AllCookies.ToArray();
             return cookies;
         }
         
