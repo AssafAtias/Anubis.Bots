@@ -433,25 +433,39 @@ namespace Anubis.Bots.Linkedin
 
             if (IsUserConnectionRequestPending(userId)) return true;
             
-            
             // clean notifications from the page
-
-            try
-            {
-                var notificationElem = FindElement("[aria-label*='Dismiss']", retrySeconds: 1, false);
-                if (notificationElem != null)
-                {
-                    ExecuteJavaScript("arguments[0].click();", notificationElem);
-                }
-            }
-            catch (Exception )
-            { 
-                // ignored
-            }
+            CleanBadgeNotification();
             
             // connect
             var buttonConnect =
-                FindElement(By.CssSelector("[aria-label*='Invite']"), retrySeconds: 10);
+                FindElement(By.CssSelector("[aria-label*='Invite']"), retrySeconds: 5, false);
+
+            if (buttonConnect == null) 
+            {
+                var moreActionsButton = FindElement("[aria-label='More actions']", retrySeconds: 5, false);
+                
+                if (moreActionsButton != null)
+                {
+                    ExecuteJavaScript("arguments[0].scrollIntoView(true);", moreActionsButton);
+                    
+                    Thread.Sleep(500);
+                    
+                    ExecuteJavaScript("arguments[0].click();", moreActionsButton);
+                    
+                    Thread.Sleep(1000);
+                    
+                    var connectButton = FindElement("[aria-label*='Invite']", retrySeconds: 5, false);
+                    
+                    if (connectButton != null)
+                    {
+                        ExecuteJavaScript("arguments[0].scrollIntoView(true);", connectButton);
+                        
+                        Thread.Sleep(500);
+                        
+                        ExecuteJavaScript("arguments[0].click();", connectButton);
+                    }
+                }
+            }
 
             ExecuteJavaScript("arguments[0].click();", buttonConnect);
 
@@ -477,12 +491,12 @@ namespace Anubis.Bots.Linkedin
             
             ExecuteJavaScript("arguments[0].scrollIntoView(true);", buttonAddANote);
             
-            Thread.Sleep(500);
+            RandomizeThreadSleep(500,1000);
             
             ExecuteJavaScript("arguments[0].click();", buttonAddANote);
-                
-            Thread.Sleep(1000);
-            
+              
+            RandomizeThreadSleep(1000,2000);
+
             // write and send a note with the connection request 
             var textAreaNote =
                 FindElement(By.CssSelector("[name='message']"), retrySeconds:10);
@@ -496,6 +510,22 @@ namespace Anubis.Bots.Linkedin
             buttonSendNote.Click();
             
             return true; 
+        }
+
+        private void CleanBadgeNotification()
+        {
+            try
+            {
+                var notificationElem = FindElement("[aria-label*='Dismiss']", retrySeconds: 1, false);
+                if (notificationElem != null)
+                {
+                    ExecuteJavaScript("arguments[0].click();", notificationElem);
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
 
         /// <summary>
