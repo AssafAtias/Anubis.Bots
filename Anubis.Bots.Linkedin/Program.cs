@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -14,16 +15,30 @@ namespace Anubis.Bots.Linkedin
         public static void Main(string[] args)
         {
             // Initialize the Chrome WebDriver
-            IWebDriver driver = new ChromeDriver();
+            // IWebDriver driver = new ChromeDriver();
+            
+            // get current directory path
+            var currentDirectoryPath = Directory.GetCurrentDirectory();
+
+            currentDirectoryPath = currentDirectoryPath.EndsWith(@"\bin\Debug")
+                ? currentDirectoryPath.Replace(@"\bin\Debug", "")
+                : currentDirectoryPath;
+            
+            var extensionPath =  $"{currentDirectoryPath}\\ChromeExtensions\\pgojnojmmhpofjgdmaebadhbocahppod";
+            
+            var options = new ChromeOptions();
+            options.AddArguments("load-extension=" + extensionPath);
+
+            IWebDriver driver = new ChromeDriver(options);
             
             driver.Manage().Window.Maximize();
 
             var userName = "netanel931139@gmail.com"; //"neta931test@gmail.com"; // "neta931test931@gmail.com"; //"neta931test@gmail.com";
             var password = "bcfhF.xe28!jdY8";
             
-            //var linkedinDriver = new LinkedinDriver(driver,userName,password); 
+            var linkedinDriver = new LinkedinDriver(driver,userName,password); 
             
-            var linkedinDriver = new LinkedinDriver(driver, "cookies.txt"); 
+            //var linkedinDriver = new LinkedinDriver(driver, "cookies.txt"); 
             
             linkedinDriver.ExportPageCookiesToFile();
             

@@ -182,10 +182,25 @@ namespace Anubis.Bots.Linkedin
             var loginButton = FindElement(By.CssSelector("[aria-label='Sign in']"));
             
             loginButton.Click();
+
+            if (_driver.Url.Contains("checkpoint/challenge"))
+            {
+                WaitForCapchaSolver();
+            }
             
             if (!IsUserLoggedIn()) throw new UnauthorizedAccessException("Failed to login");
         }
-        
+
+        private void WaitForCapchaSolver()
+        {
+            var start = DateTime.UtcNow;
+            do
+            {
+                Thread.Sleep(1000);
+            } while (_driver.Url.Contains("checkpoint/challenge") && (DateTime.UtcNow - start).TotalSeconds < 60);
+        }
+
+
         /// <summary>
         /// Login to Linkedin using cookies from file
         /// </summary>
