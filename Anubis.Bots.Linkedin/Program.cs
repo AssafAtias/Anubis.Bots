@@ -33,8 +33,8 @@ namespace Anubis.Bots.Linkedin
             
             driver.Manage().Window.Maximize();
 
-            var userName = "netanel931139@gmail.com"; //"neta931test@gmail.com"; // "neta931test931@gmail.com"; //"neta931test@gmail.com";
-            var password = "bcfhF.xe28!jdY8";
+            var userName = "assaf.atias@gmail.com"; //"neta931test@gmail.com"; // "neta931test931@gmail.com"; //"neta931test@gmail.com";
+            var password = "Assaf@3490";
             
             var linkedinDriver = new LinkedinDriver(driver,userName,password); 
             
@@ -48,15 +48,19 @@ namespace Anubis.Bots.Linkedin
             //
             // linkedinDriver.Navigate(LinkedinNavigatorOptions.Feed);
 
-            var postUri = new Uri("https://www.linkedin.com/feed/update/urn:li:share:7141863247749533696");
+            //var postUri = new Uri("https://www.linkedin.com/feed/update/urn:li:share:7141863247749533696");
+            
+//            linkedinDriver.RequestToJoinGroup(new Uri("https://www.linkedin.com/groups/2548564/"));
+            
+            linkedinDriver.RequestToConnectPeopleByGroupUrl(new Uri("https://www.linkedin.com/groups/2548564/"), 10);
             
             // linkedinDriver.LikeOnPost(postUri, PostReaction.Like);
             
             // linkedinDriver.RequestToConnectPeopleByHashtag("#csharp", 10);
             
-            linkedinDriver.SendConnectionRequest("demibenari");
+            //linkedinDriver.SendConnectionRequest("demibenari");
             
-            // linkedinDriver.LikeOnPostByHashtag("#dotnet", 10);
+            linkedinDriver.LikeOnPostByHashtag("#dotnet", 10);
 
             
             

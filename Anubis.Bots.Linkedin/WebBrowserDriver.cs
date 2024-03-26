@@ -82,8 +82,6 @@ namespace Anubis.Bots.Linkedin
                 {
                     if (throwExceptionIfNotFound)
                         throw;
-                    else
-                        throw e;
                 }
             });
 

@@ -582,22 +582,74 @@ namespace Anubis.Bots.Linkedin
                 // ignored
             }
         }
+
+        public void RequestToJoinGroup(string groupName)
+        {
+            
+        }
         
         /// <summary>
         /// Request to join group by group uri 
         /// </summary>
         /// <param name="groupUri"></param>
-        /// <exception cref="NotImplementedException"></exception>
+        
        public void RequestToJoinGroup(Uri groupUri)
        {
            _linkedinNavigator.Navigate(groupUri);
            
-           // var joinButton = FindElement(By.CssSelector(".artdeco-button--primary"), retrySeconds: 10);
-           //
-           // joinButton.Click();
+           var joinButton = FindElement(By.CssSelector(".artdeco-button--primary"), retrySeconds: 10);
            
-           throw new NotImplementedException();
+           ExecuteJavaScript("arguments[0].click();", joinButton);
        }
+
+        public void RequestToConnectPeopleByGroupUrl(Uri groupUri, int numOfPeopleToConnect, string inviteNote = "Hey, I would like to increase my network and connect with you. I hope you don't mind. Thanks!")
+        {
+            _linkedinNavigator.Navigate(groupUri + "/members");
+
+            RandomizeThreadSleep();
+           
+            var maxLoop = 100;
+            var invited = 0;
+            do
+            {
+                // connect
+                var connectButtons =
+                    FindElements(By.CssSelector("[aria-label*='Invite']"));
+
+                if (connectButtons == null || !connectButtons.Any())
+                {
+                    var elem = FindElement("[aria-label='Next']", retrySeconds: 5, false);
+
+                    if (elem == null || elem.GetAttribute("disabled") != null)
+                    {
+                        ExecuteJavaScript("window.scrollTo(0, document.body.scrollHeight);");
+                        RandomizeThreadSleep();
+                        continue;
+                    }
+               
+                    // scroll to next page
+                    elem.Click();
+               
+                    RandomizeThreadSleep();
+                    continue;
+                }
+
+                IWebElement[] selectedConnectButtons; 
+
+                if (connectButtons.Count > numOfPeopleToConnect - invited)
+                    selectedConnectButtons = connectButtons.Take((int)numOfPeopleToConnect- invited).ToArray();
+                else if (connectButtons.Count > numOfPeopleToConnect)
+                    selectedConnectButtons = connectButtons.Take((int)numOfPeopleToConnect).ToArray();
+                else
+                    selectedConnectButtons = connectButtons.ToArray();
+               
+                invited += InviteToConnect(selectedConnectButtons, inviteNote);
+               
+                RandomizeThreadSleep();
+               
+            } while (invited < numOfPeopleToConnect
+                     && maxLoop-- > 0);
+        }
         
        /// <summary>
        /// Connect with people by hashtag 
@@ -678,7 +730,14 @@ namespace Anubis.Bots.Linkedin
        {
            try
            {
-               ExecuteJavaScript("arguments[0].scrollIntoView(true);", buttonConnect);
+               try
+               {
+                   ExecuteJavaScript("arguments[0].scrollIntoView(true);", buttonConnect);
+               }
+               catch (Exception e)
+               {
+                   Console.WriteLine(e);
+               }
                
                RandomizeThreadSleep(500, 1000);
                
