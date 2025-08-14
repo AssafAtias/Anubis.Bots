@@ -16,72 +16,48 @@ namespace Anubis.Bots.Linkedin
         {
             // Initialize the Chrome WebDriver
             // IWebDriver driver = new ChromeDriver();
-            
+
             // get current directory path
             var currentDirectoryPath = Directory.GetCurrentDirectory();
 
-            currentDirectoryPath = currentDirectoryPath.EndsWith(@"\bin\Debug")
-                ? currentDirectoryPath.Replace(@"\bin\Debug", "")
-                : currentDirectoryPath;
-            
-            var extensionPath =  $"{currentDirectoryPath}\\ChromeExtensions\\pgojnojmmhpofjgdmaebadhbocahppod";
-            
+            // Cross-platform path handling
+            var debugPath = Path.Combine("bin", "Debug");
+            var releasePath = Path.Combine("bin", "Release");
+
+            if (currentDirectoryPath.EndsWith(debugPath))
+                currentDirectoryPath = currentDirectoryPath.Replace(debugPath, "");
+            else if (currentDirectoryPath.EndsWith(releasePath))
+                currentDirectoryPath = currentDirectoryPath.Replace(releasePath, "");
+
+            var extensionPath =
+                Path.Combine(currentDirectoryPath, "ChromeExtensions", "pgojnojmmhpofjgdmaebadhbocahppod");
+
             var options = new ChromeOptions();
             options.AddArguments("load-extension=" + extensionPath);
 
-            IWebDriver driver = new ChromeDriver(options);
-            
-            driver.Manage().Window.Maximize();
+            try
+            {
+                IWebDriver driver = new ChromeDriver(options);
+                driver.Manage().Window.Maximize();
 
-            var userName = "assaf.atias@gmail.com"; //"neta931test@gmail.com"; // "neta931test931@gmail.com"; //"neta931test@gmail.com";
-            var password = "Assaf@3490";
-            
-            var linkedinDriver = new LinkedinDriver(driver,userName,password); 
-            
-            //var linkedinDriver = new LinkedinDriver(driver, "cookies.txt"); 
-            
-            linkedinDriver.ExportPageCookiesToFile();
-            
-            // linkedinDriver.Navigate(LinkedinNavigatorOptions.ViewProfile);
-           
-            // var postUri = linkedinDriver.PublishPost("postttt" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            //
-            // linkedinDriver.Navigate(LinkedinNavigatorOptions.Feed);
+                var userName =
+                    "assaf.atias@gmail.com"; //"neta931test@gmail.com"; // "neta931test931@gmail.com"; //"neta931test@gmail.com";
+                var password = "Assaf@3490";
 
-            //var postUri = new Uri("https://www.linkedin.com/feed/update/urn:li:share:7141863247749533696");
-            
-//            linkedinDriver.RequestToJoinGroup(new Uri("https://www.linkedin.com/groups/2548564/"));
-            
-            linkedinDriver.RequestToConnectPeopleByGroupUrl(new Uri("https://www.linkedin.com/groups/2548564/"), 10);
-            
-            // linkedinDriver.LikeOnPost(postUri, PostReaction.Like);
-            
-            // linkedinDriver.RequestToConnectPeopleByHashtag("#csharp", 10);
-            
-            //linkedinDriver.SendConnectionRequest("demibenari");
-            
-            linkedinDriver.LikeOnPostByHashtag("#dotnet", 10);
+                var linkedinDriver = new LinkedinDriver(driver, userName, password);
 
-            
-            
-            //
-            // var commentUri = linkedinDriver.AddCommentToPost(postUri, commentText: "commentttt" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            //
+                linkedinDriver.ExportPageCookiesToFile();
+                linkedinDriver.RequestToConnectPeopleByGroupUrl(new Uri("https://www.linkedin.com/groups/2548564/"),
+                    10);
+                linkedinDriver.LikeOnPostByHashtag("#dotnet", 10);
 
-            // var unseenMessagesCount = linkedinDriver.GetUnseenMessagesCount();
-            // var unreadNotificationsCount = linkedinDriver.GetUnreadNotificationsCount();
-            //
-            // var userId = "assaf-atias-84099832";
-            // // userId = "netanel-abergel";
-            //
-            // if(!linkedinDriver.IsConnectedUser(userId) && !linkedinDriver.IsUserConnectionRequestPending(userId))
-            //     linkedinDriver.SendConnectionRequest(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            // else if(!linkedinDriver.IsUserConnectionRequestPending(userId))
-            //     linkedinDriver.SendMessageToUser(userId, "messageee" + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            //
-            
-            // Close the browser after task completion
-            driver.Quit();
+                driver.Quit();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
 
@@ -136,6 +112,5 @@ namespace Anubis.Bots.Linkedin
 
             // Scroll up by a certain number of pixels (e.g., -500 pixels)
         }
-        
     }
 }
