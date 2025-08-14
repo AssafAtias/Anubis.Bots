@@ -1,0 +1,41 @@
+[
+  {
+    "Id": "b1ddab67-d545-49a1-bd84-c8cdbdb97550",
+    "Username": "tiktokuser1@example.com",
+    "Password": "password1",
+    "Platform": "TikTok",
+    "Proxy": null,
+    "UserAgent": null,
+    "Cookies": {},
+    "LastUsed": "0001-01-01T00:00:00",
+    "IsActive": true,
+    "DailyActionCount": 0,
+    "LastActionDate": "0001-01-01T00:00:00"
+  },
+  {
+    "Id": "afb66e5e-1dc3-4f62-8226-5fbe11e4bf4a",
+    "Username": "tiktokuser2@example.com",
+    "Password": "password2",
+    "Platform": "TikTok",
+    "Proxy": null,
+    "UserAgent": null,
+    "Cookies": {},
+    "LastUsed": "0001-01-01T00:00:00",
+    "IsActive": true,
+    "DailyActionCount": 0,
+    "LastActionDate": "0001-01-01T00:00:00"
+  },
+  {
+    "Id": "8b1bf760-3bef-4bc3-9191-c6b68ec022c4",
+    "Username": "tiktokuser3@example.com",
+    "Password": "password3",
+    "Platform": "TikTok",
+    "Proxy": null,
+    "UserAgent": null,
+    "Cookies": {},
+    "LastUsed": "0001-01-01T00:00:00",
+    "IsActive": true,
+    "DailyActionCount": 0,
+    "LastActionDate": "0001-01-01T00:00:00"
+  }
+]
